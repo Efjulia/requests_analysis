@@ -1,3 +1,5 @@
+import csv
+
 from tensorflow.keras.models import load_model
 from tensorflow.keras.models import Sequential
 from tensorflow.keras.layers import Dense, Embedding, Conv1D, GlobalMaxPooling1D
@@ -7,9 +9,7 @@ from tensorflow.keras.callbacks import ModelCheckpoint
 from tensorflow.keras import utils
 import pandas as pd
 import numpy as np
-import csv
-import pickle
-
+import logging
 
 
 num_words = 10000
@@ -27,6 +27,7 @@ class classification_data:
         pass
 
     def classification(self):
+        logging.info(f'Запущена функция классификации на заявке')
         # данные для обучения модели, в файле сначала номер класса,
         # к которому принадлежит заявка, далее сам текст заявки
         train = pd.read_csv('output.csv',
@@ -34,9 +35,12 @@ class classification_data:
                             names=['class', 'text'], delimiter=';')
         # используем для обучения текст заявки
         text_request = train['text']
+        # print(text_request)
+        text_request = text_request
         # создаем вектор выходных значений по названию классов заявок
-        y_train = utils.to_categorical(train['class'] - 1, nb_classes)
+        # y_train = utils.to_categorical(train['class'] - 1, nb_classes)
         # print(y_train)
+        # Используем токенизатор с исходной обучающей выборки
         tokenizer = Tokenizer(num_words=num_words)
         tokenizer.fit_on_texts(text_request)
         # печатаем словарь, построенный токенизатором
@@ -45,47 +49,50 @@ class classification_data:
         try:
             # for key, val in tokenizer.word_index.items():
             #     out.write('{}:{}\n'.format(key, val))
-            with open("tokenizer.txt", "w", encoding="utf-8") as file:
-                for elem in token:
-                    file.write(str(elem) + "\n")
+            # with open("tokenizer.txt", "w", encoding="utf-8") as file:
+            #     for elem in token:
+            #         file.write(str(elem) + "\n")
                 # writer.writerow(list(tokenizer.word_index.items()))
-            print('Данные загружены в словарь')
+            # logging.info(f'Запущена функция классификации на заявке')
+            logging.info(f'Данные загружены в словарь, функция классификатор')
         except Exception as e:
-            print('Ошибка загрузки данных в словарь' + str(e))
+            logging.info(f'Ошибка загрузки данных в словарь' + str(e))
 
         # Преобразуем текст обращения в числовое представление
         sequences = tokenizer.texts_to_sequences(text_request)
+
         # Просматриваем текст обращения в числовом представлении
         index = 22
         x_train = pad_sequences(sequences, maxlen=max_request_len)
 
-
-        model_cnn = Sequential()
-        model_cnn.add(Embedding(num_words, 32, input_length=max_request_len))
-        model_cnn.add(Conv1D(250, 5, padding='valid', activation='relu'))
-        model_cnn.add(GlobalMaxPooling1D())
-        model_cnn.add(Dense(128, activation='relu'))
-        model_cnn.add(Dense(3, activation='softmax'))
-        model_cnn.compile(optimizer='adam',
-                          loss='categorical_crossentropy',
-                          metrics=['accuracy'])
-        model_cnn.summary()
-        model_cnn_save_path = 'best_model_cnn.h5'
-        checkpoint_callback_cnn = ModelCheckpoint(model_cnn_save_path,
-                                                  monitor='val_accuracy',
-                                                  save_best_only=True,
-                                                  verbose=1)
-        model_cnn_save_path = 'best_model_cnn.h5'
-        checkpoint_callback_cnn = ModelCheckpoint(model_cnn_save_path,
-                                                  monitor='val_accuracy',
-                                                  save_best_only=True,
-                                                  verbose=1)
-        history_cnn = model_cnn.fit(x_train,
-                                    y_train,
-                                    epochs=5,
-                                    batch_size=128,
-                                    validation_split=0.2,
-                                    callbacks=[checkpoint_callback_cnn])
+        # создаем экземпляр модели
+        # model_cnn = Sequential()
+        # model_cnn.add(Embedding(num_words, 32, input_length=max_request_len))
+        # model_cnn.add(Conv1D(250, 5, padding='valid', activation='relu'))
+        # model_cnn.add(GlobalMaxPooling1D())
+        # model_cnn.add(Dense(128, activation='relu'))
+        # model_cnn.add(Dense(3, activation='softmax'))
+        # model_cnn.compile(optimizer='adam',
+        #                   loss='categorical_crossentropy',
+        #                   metrics=['accuracy'])
+        # model_cnn.summary()
+        #
+        # model_cnn_save_path = 'best_model_cnn.h5'
+        # checkpoint_callback_cnn = ModelCheckpoint(model_cnn_save_path,
+        #                                           monitor='val_accuracy',
+        #                                           save_best_only=True,
+        #                                           verbose=1)
+        # model_cnn_save_path = 'best_model_cnn.h5'
+        # checkpoint_callback_cnn = ModelCheckpoint(model_cnn_save_path,
+        #                                           monitor='val_accuracy',
+        #                                           save_best_only=True,
+        #                                           verbose=1)
+        # history_cnn = model_cnn.fit(x_train,
+        #                             y_train,
+        #                             epochs=5,
+        #                             batch_size=128,
+        #                             validation_split=0.2,
+        #                             callbacks=[checkpoint_callback_cnn])
 
         test = pd.read_csv('test_text_request.csv',
                            header=None,
@@ -94,11 +101,15 @@ class classification_data:
         test_sequences = tokenizer.texts_to_sequences(test['text'])
         x_test = pad_sequences(test_sequences, maxlen=max_request_len)
         y_test = utils.to_categorical(test['class'] - 1, nb_classes)
-        # model_cnn.load_weights(model_cnn_save_path)
+
+        # with open('result_output_data.csv', newline='') as f:
+        #     reader = csv.reader(f)
+        #     row1 = next(reader)
         test_text = pd.read_csv('result_output_data.csv',
                            header=None,
                            names=['class', 'text'], delimiter=";")
-        model = load_model("best_model_lstm.h5")
+        # загрузка лучшей модели для классификации
+        model = load_model("best_model_cnn.h5")
 
         # print(test_text["text"])
         test_sequences = tokenizer.texts_to_sequences(test_text["text"])
@@ -108,8 +119,14 @@ class classification_data:
         prediction = model.predict(x)
         # print(prediction)
         prediction = np.argmax(prediction)
-        print("Номер класса:", prediction + 1)
-        print("Название класса:", classes[prediction])
+        str1 = "Номер класса: " + str(prediction + 1) + "\n"+ "Название класса: " + str(classes[prediction])
+        data = []
+        data.append(str1)
+        with open("result_classification.csv", "w", encoding="utf-8", newline='') as csvfile:
+            writer = csv.writer(csvfile, delimiter='\n')
+            writer.writerow(data)
+
+
 
 
 

@@ -3,7 +3,7 @@ import logging
 # Включить, если не надо выводить в консоль параметры обучения и настройки модели
 # сообщение от тензофло выпадает когда нет графического процессора GPU, это не ошибка, просто работает медленнее
 # logging.getLogger('tensorflow').disabled = True
-from log_file_UI import Window1, Window3
+from log_file_UI import Window1, Window3, Window4
 from importer_user_data import importer_data
 import sys
 
@@ -58,8 +58,8 @@ class MyWidget(QMainWindow, Ui_MainWindow):
         self.image.setPixmap(self.pixmap)
         self.setupUi(self)
         # Просмотр лог файла
-        self.pushButton_3.setIcon(QIcon('icons/saveas.png'))
-        self.pushButton_3.clicked.connect(self.run_log)
+        self.pushButton_9.setIcon(QIcon('icons/saveas.png'))
+        self.pushButton_9.clicked.connect(self.run_log)
         self.pushButton_11.clicked.connect(self.registration)
         self.pushButton_10.clicked.connect(self.auntentification)
         # Запуск импорта файло с текстом
@@ -76,9 +76,9 @@ class MyWidget(QMainWindow, Ui_MainWindow):
         # запуск классификации пользовательских заявок
         self.pushButton_7.clicked.connect(self.run_user_data)
         # просмотр результата классификации пользовательских заявок
-        self.pushButton_8.clicked.connect(self.run_user_data)
+        # self.pushButton_8.clicked.connect(self.run_user_data)
         # просмотр словаря
-        self.pushButton_9.clicked.connect(self.tokenizer_look)
+        self.pushButton_8.clicked.connect(self.tokenizer_look)
 
     # просмотр словаря токенизотора
     def tokenizer_look(self):
@@ -235,17 +235,19 @@ class MyWidget(QMainWindow, Ui_MainWindow):
     def run_user_data(self):
         # проверка связи :)
         self.label.setText(" ")
-        myclassificator.classification()
-        # self.image_update("my_chart.jpg")
-        # fname = QFileDialog.getOpenFileName(self, 'Выбрать файл', '')[0]
+        self.win4 = Window4()
+        self.win4.show()
+        # self.pushButton.clicked.connect(self.run_classification())
+
+
+    def run_classification(self):
+        self.win4.run_classification()
 
     def run_log(self):
         # Просмотр лог файла
         self.win1 = Window1()
         self.win1.show()
-        # self.label.setText("OK")
-        # fname = QFileDialog.getOpenFileName(self, 'Выбрать файл', '',
-        #                                     'Лог-файл (*.log);;Все файлы (*)')[0]
+
 
     def auntentification(self):
         # Аутентификация файл с паролями password_user.csv
@@ -268,7 +270,7 @@ class MyWidget(QMainWindow, Ui_MainWindow):
                     logging.info(f'Пользователь '+user_from_txt+' успешно авторизован')
                     self.pushButton.setEnabled(True)
                     self.pushButton_2.setEnabled(True)
-                    self.pushButton_3.setEnabled(True)
+                    # self.pushButton_3.setEnabled(True)
                     self.pushButton_4.setEnabled(True)
                     self.pushButton_5.setEnabled(True)
                     self.pushButton_6.setEnabled(True)
@@ -283,7 +285,7 @@ class MyWidget(QMainWindow, Ui_MainWindow):
                 logging.info(f'Пользователь ' + user_from_txt + ' не авторизован. Не найден пользователь или неверный пароль.')
                 self.pushButton.setEnabled(False)
                 self.pushButton_2.setEnabled(False)
-                self.pushButton_3.setEnabled(False)
+                # self.pushButton_3.setEnabled(False)
                 self.pushButton_4.setEnabled(False)
                 self.pushButton_5.setEnabled(False)
                 self.pushButton_6.setEnabled(False)
@@ -315,7 +317,7 @@ class MyWidget(QMainWindow, Ui_MainWindow):
             logging.info(f'Регистрация не завершена, такой логин существует')
             self.pushButton.setEnabled(False)
             self.pushButton_2.setEnabled(False)
-            self.pushButton_3.setEnabled(False)
+            # self.pushButton_3.setEnabled(False)
             self.pushButton_4.setEnabled(False)
             self.pushButton_5.setEnabled(False)
             self.pushButton_6.setEnabled(False)
@@ -335,7 +337,7 @@ class MyWidget(QMainWindow, Ui_MainWindow):
                 logging.info(f'Пользователь '+ user_from_txt +' успешно зарегистрирован')
                 self.pushButton.setEnabled(False)
                 self.pushButton_2.setEnabled(False)
-                self.pushButton_3.setEnabled(False)
+                # self.pushButton_3.setEnabled(False)
                 self.pushButton_4.setEnabled(False)
                 self.pushButton_5.setEnabled(False)
                 self.pushButton_6.setEnabled(False)
